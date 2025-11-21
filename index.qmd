@@ -1,11 +1,9 @@
 ---
-title: "jbat22.github.io"
+title: "Jessica Schmidt"
+image: js_image.JPG
+about:
+  template: solana
 ---
 
-This is a Quarto website.
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-1 + 1
-```
+Hello! My name is Jessica; I am a current senior at St. Olaf College majoring in Biology and Mathematics with concentrations in Mathematical Biology and Statistics and Data Science. 
