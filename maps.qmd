@@ -1,0 +1,172 @@
+---
+title: "Choropleth Maps"
+editor_options: 
+  chunk_output_type: console
+---
+
+## National Parks of the United States
+
+First, we will look at how national parks are distributed across the United States. Which states have the most national parks? Which regions? 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+#Load in libraries and code
+library(tidyverse)
+library(mdsr)  
+library(viridis) 
+library(maps)
+library(leaflet)
+library(sf)
+us_states <- map_data("state")
+us_parks <- read.csv("~/jbat22.github.io/park.csv")
+culvers <- read.csv("~/jbat22.github.io/culvers.csv")
+```
+
+```{r, echo=FALSE, warning=FALSE}
+us_parks |>
+  #get variables and names to line up to join
+  mutate(State = str_to_lower(State)) |> 
+  right_join(us_states, by = c("State" = "region")) |>
+  #fill in missing values from states without parks
+  mutate(total_parks = replace_na(total_parks, 0)) |>
+  #plot
+  ggplot(mapping = aes(x = long, y = lat,
+                          group = group)) + 
+  geom_polygon(aes(fill = total_parks), color = "black") + 
+  labs(fill = "Num. National Parks",
+       title = "Num. National Parks by State") +
+  coord_map() +
+  theme_void() +
+  scale_fill_viridis()
+```
+
+National parks seem to be the most prevalent in the western side of the United States, including top states like California. We can also explore this in an interactive plot. 
+
+```{r, echo=FALSE, warning=FALSE}
+#read in states as sf
+states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")
+```
+
+
+```{r, echo=FALSE, warning=FALSE}
+# Create our own category bins for population densities
+#   and assign the yellow-orange-red color palette
+bins <- c(0, 1, 2, 3, 4, 5, 6, 7, Inf)
+ states <- states |> 
+   left_join(us_parks, join_by(name == State)) |>
+   mutate(total_parks = replace_na(total_parks, 0))
+pal <- colorBin("YlOrRd", domain = states$total_parks, bins = bins)
+
+# Create labels that pop up when we hover over a state.  The labels must
+#   be part of a list where each entry is tagged as HTML code.
+library(htmltools)
+library(glue)
+
+states <- states |>
+  mutate(labels = str_c(name, ": ", total_parks, " national parks"))
+
+labels <- lapply(states$labels, HTML)
+
+leaflet(states) %>%
+  setView(-96, 37.8, 4) %>%
+  addTiles() %>%
+  addPolygons(
+    fillColor = ~pal(total_parks),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) %>%
+  addLegend(pal = pal, values = ~total_parks, opacity = 0.7, title = NULL,
+    position = "bottomright")
+```
+
+This plot allows us to explore in more detail the number of national parks in any state of interest. 
+
+Data from: https://www.kaggle.com/datasets/thedevastator/the-united-states-national-parks?resource=download
+
+## Which states have Culver's? 
+
+Culver's is a popular fast food chain known for being a Wisconsin staple that has spread across the US. How far, exactly, has it spread? We can explore this with a plot. 
+
+```{r, echo=FALSE, warning=FALSE}
+#adjust data for clearer legend and joining
+culvers |>
+  mutate(culver.s = as.factor(culver.s),
+         name = str_to_lower(name),
+         culver.s = fct_recode(culver.s, 
+                               Yes = "1",
+                               No = "0")) |>
+  right_join(us_states, by = c("name" = "region")) |>
+  #plot
+  ggplot(mapping = aes(x = long, y = lat,
+                          group = group)) + 
+  geom_polygon(aes(fill = culver.s), color = "black") + 
+  labs(fill = "Culver's?",
+       title = "Spread of Culver's Across the USA") +
+  coord_map() +
+  theme_void() 
+```
+
+From this plot, we can see that Culver's has indeed radiated out of the Midwest, with the Southern states being another popular location while the eastern and western coasts are yet untapped markets. We can also explore this plot interactively. 
+
+```{r, echo=FALSE, warning=FALSE}
+#reread in states as new sf
+states <- read_sf("https://rstudio.github.io/leaflet/json/us-states.geojson")
+# Create our own category bins for population densities
+#   and assign the yellow-orange-red color palette
+bins <- c(0, 1, 2)
+states <- states |>
+   left_join(culvers)
+pal <- colorBin("YlOrRd", domain = states$culver.s, bins = bins)
+
+# Create labels that pop up when we hover over a state.  The labels must
+#   be part of a list where each entry is tagged as HTML code.
+library(htmltools)
+library(glue)
+
+states <- states |>
+  mutate(labels = str_c(name, " has ", culver.s, " Culver's"))
+
+# If want more HTML formatting, use these lines instead of those above:
+#states <- states |>
+#  mutate(labels = glue("<strong>{name}</strong><br/>{density} people / #mi<sup>2</sup>"))
+
+labels <- lapply(states$labels, HTML)
+
+leaflet(states) %>%
+  setView(-96, 37.8, 4) %>%
+  addTiles() %>%
+  addPolygons(
+    fillColor = ~pal(culver.s),
+    weight = 2,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlightOptions = highlightOptions(
+      weight = 5,
+      color = "#666",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto")) %>%
+  addLegend(pal = pal, values = ~culver.s, opacity = 0.7, title = NULL,
+    position = "bottomright")
+```
+
+Data from: https://www.culvers.com/stories/signature-stories/culvers-locations-by-state

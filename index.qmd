@@ -3,7 +3,34 @@ title: "Jessica Schmidt"
 image: js_image.JPG
 about:
   template: solana
+  image-shape: round
+  links:
+    - text: LinkedIn
+      href: https://www.linkedin.com/in/jessica-schmidt-273749372
+    - text: GitHub
+      href: https://github.com/jbat22/jbat22.github.io
+    - text: Email
+      href: mailto:schmid47@stolaf.edu
 ---
 
 
-Hello! My name is Jessica; I am a current senior at St. Olaf College majoring in Biology and Mathematics with concentrations in Mathematical Biology and Statistics and Data Science. 
+Hello! My name is Jessica; I am a current senior at St. Olaf College majoring in Biology and Mathematics with concentrations in Mathematical Biology and Statistics and Data Science. I enjoy reading, playing games, and bird-watching.
+
+## Education
+
+St. Olaf College | Northfield, MN  
+B.A. in Biology and Mathematics | Sept 2022 - Present
+
+Glenbrook South High School | Glenview, IL  
+High School Degree | Sept 2018 - May 2022
+
+## Research Experience
+
+Harvard University | Cambridge, MA  
+REU Student Researcher | June 2025 - Aug 2025
+
+St. Olaf College | Northfield, MN  
+Adam S. Thomas Endowed Avian Researcher | Sept 2024 - Dec 2025
+
+St. Olaf College | Northfield, MN  
+CURI Summer Scholar | June 2023 - Aug 2023, June 2024 - Aug 2024
